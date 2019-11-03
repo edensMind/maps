@@ -1,0 +1,121 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <title>2012 Manufacturing - US Census</title>
+
+        <style type="text/css">
+#container {
+    height: 900px;
+    min-width: 310px;
+    max-width: 1400px;
+    margin: 0 auto; 
+}
+.loading {
+    margin-top: 10em;
+    text-align: center;
+    color: gray;
+}
+
+#sectorForm {
+    position: absolute;
+    top:5px;
+    left:5px;
+}
+
+
+        </style>
+    </head>
+    <body>
+<script src="https://code.highcharts.com/maps/highmaps.js"></script>
+<script src="https://code.highcharts.com/maps/modules/data.js"></script>
+<script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+<script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+<script src="https://code.highcharts.com/mapdata/countries/us/us-all.js"></script>
+
+<form action="{{ url_for('manufacturing') }}" method="post" id="sectorForm">
+    <button type="submit">Submit</button>
+    <br/>
+    <input type="text" id="sectorInput" name="sectorInput">
+</form>
+
+<div id="container"></div>
+
+
+
+        <script type="text/javascript">
+Highcharts.getJSON('./static/SectorData.json', function (data) {
+
+    // Make codes uppercase to match the map data
+    data.forEach(function (p) {
+        p.code = p.code.toUpperCase();
+    });
+
+    // Instantiate the map
+    Highcharts.mapChart('container', {
+
+        chart: {
+            map: 'countries/us/us-all',
+            borderWidth: 1
+        },
+
+        title: {
+            text:'{{title}}'
+        },
+
+        exporting: {
+            sourceWidth: 600,
+            sourceHeight: 500
+        },
+
+        legend: {
+            layout: 'horizontal',
+            borderWidth: 0,
+            backgroundColor: 'rgba(255,255,255,0.85)',
+            floating: true,
+            verticalAlign: 'top',
+        //itemWidth: 500,
+            y: 25
+        },
+
+        mapNavigation: {
+            enabled: true
+        },
+
+        colorAxis: {
+            min: 0,
+            max: {{maxValue}},
+            tickInterval: {{tickInterval}},
+            // minColor: '#EEEEFF',
+            // maxColor: '#000022',
+            stops: [
+                [0, '#EFEFFF'],
+                [0.67, '#4444FF'],
+                [1, '#000022']
+            ]
+        },
+
+        series: [{
+            animation: {
+                duration: 1000
+            },
+            borderColor: '#cccccc',
+            data: data,
+            joinBy: ['postal-code', 'code'],
+            dataLabels: {
+                enabled: true,
+                color: '#FFFFFF',
+                format: '{point.code}'
+            },
+            name: '# of establishments - 2012 census.gov',
+            tooltip: {
+                pointFormat: '{point.code}: {point.value}'
+            }
+        }]
+    });
+});
+
+        </script>
+    </body>
+</html>
